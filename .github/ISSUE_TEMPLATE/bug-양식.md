@@ -1,6 +1,6 @@
 ---
-name: " Bug 양식"
-about: 오류가 있음을 알릴 때.
+name: Bug 양식
+about: 오류가 있음을 알릴 때
 title: "[bug] "
 labels: bug
 assignees: ''
