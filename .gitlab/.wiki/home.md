@@ -48,5 +48,5 @@ title: "\U0001F4AA제목입니당"
 
 <br>
 
-# 7. [기타 (Appendix)]()
+# 7. 기타 (Appendix)
 - 
