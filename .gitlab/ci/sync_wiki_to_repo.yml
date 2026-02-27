@@ -1,0 +1,43 @@
+sync_wiki_to_repo:
+  stage: sync
+  image: alpine:3.20
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "trigger"'
+  before_script:
+    - apk add --no-cache bash git rsync
+    - git config user.email "${BOT_EMAIL:-wiki-bot@example.com}"
+    - git config user.name "${BOT_NAME:-wiki-sync-bot}"
+  script:
+    - |
+      set -euo pipefail
+
+      # 필수 변수 체크
+      test -n "${WIKI_GIT_URL:-}" || { echo "WIKI_GIT_URL required"; exit 1; }
+      test -n "${BOT_TOKEN:-}"   || { echo "BOT_TOKEN required"; exit 1; }
+
+      # 기준 브랜치 최신 상태로 맞추고 작업 (master만 있으면 master 사용)
+      if git ls-remote --exit-code --heads origin master >/dev/null 2>&1; then
+        BASE_BRANCH=master
+      else
+        BASE_BRANCH=master
+      fi
+      TARGET_BRANCH=feat/101-wiki-manage-branch
+
+      git fetch origin "$BASE_BRANCH"
+      git checkout -B "$TARGET_BRANCH" "origin/$BASE_BRANCH"
+
+      # wiki clone
+      rm -rf /tmp/wiki
+      git clone "${WIKI_GIT_URL}" /tmp/wiki
+
+      # .gitlab/.wiki로 미러링
+      mkdir -p .gitlab/.wiki
+      rsync -a --delete --exclude '.git/' /tmp/wiki/ .gitlab/.wiki/
+
+      # 변경 없으면 종료
+      git add .gitlab/.wiki
+      git diff --cached --quiet && { echo "No changes"; exit 0; }
+
+      # 변경 있으면 커밋 + TARGET_BRANCH에 직접 push (MR 없음)
+      git commit -m "chore(wiki): sync into .gitlab/.wiki"
+      git push "https://oauth2:${BOT_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "HEAD:${TARGET_BRANCH}"
