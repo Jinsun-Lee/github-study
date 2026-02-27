@@ -1,7 +1,7 @@
 ---
 name: Feat 양식
 about: 새로운 기능을 추가할 때
-title: "[feat]"
+title: "[feat] "
 labels: feat
 assignees: ''
 
