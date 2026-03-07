@@ -1,0 +1,2 @@
+include:
+  - local: .gitlab/ci/sync_wiki_to_repo.yml
