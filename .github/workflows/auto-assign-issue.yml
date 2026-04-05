@@ -1,0 +1,29 @@
+# 이슈가 새로 열릴 때마다 작성자를 자동으로 담당자(assignee)로 지정하는 워크플로우.
+# 이슈 템플릿의 `assignees` 필드는 고정된 username만 받아서 "이슈 올린 사람 = 담당자"
+# 규칙을 표현할 수 없기 때문에, 대신 Actions 로 처리한다.
+
+name: Auto Assign Issue Author
+
+# 트리거: 이슈가 새로 열렸을 때(`opened`)만 동작. 수정/재오픈 시에는 동작하지 않음.
+on:
+  issues:
+    types: [opened]
+
+# 이 워크플로우가 사용할 최소 권한. 이슈에 담당자를 붙이려면 issues: write 필요.
+permissions:
+  issues: write
+
+jobs:
+  assign-author:
+    runs-on: ubuntu-latest
+    steps:
+      # gh CLI 로 현재 이슈에 작성자를 assignee 로 추가한다.
+      # github.event.issue.user.login = 이슈를 연 사용자의 GitHub username.
+      - name: Assign issue to its author
+        run: gh issue edit "$ISSUE_NUMBER" --add-assignee "$ISSUE_AUTHOR" --repo "$GH_REPO"
+        env:
+          # GITHUB_TOKEN 은 워크플로우 실행 시 자동 발급되는 토큰(별도 시크릿 설정 불필요).
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
