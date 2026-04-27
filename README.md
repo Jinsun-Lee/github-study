@@ -1,4 +1,4 @@
 # 설명  
-GitHub, GitLab, Jira를 포함한 DevOps 워크플로우와 CI/CD 파이프라인을 정리하는 저장소입니다.
+반복 작업을 자동화하여 개발 생산성을 극대화하는 DevOps 템플릿 저장소입니다.
 
-<br><br>  
+<br><br>
